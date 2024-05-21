@@ -13,3 +13,4 @@ tiktoken==0.4.0
 uuid==1.30
 backoff==2.2.1
 redis==5.0.0
+gunicorn

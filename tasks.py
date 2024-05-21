@@ -9,3 +9,11 @@ def dev(ctx):
         pty=os.name != "nt",
         env={"APP_ENV": "development"},
     )
+
+@task
+def prod(ctx):
+    ctx.run(
+        "gunicorn --bind 0.0.0.0:8000 app.web:app",
+        pty=os.name != "nt",
+        env={"APP_ENV": "production"},
+    )
