@@ -18,7 +18,8 @@ def get_user():
 def signup():
     email = request.json.get("email")
     token = generate_confirmation_token(email)
-    confirm_url = url_for('auth.confirm_email', token=token, _external=True)
+    frontend_url = current_app.config.get('FRONTEND_URL')
+    confirm_url = f"{frontend_url}/confirm/{token}"
     html = f"<p>Please click the link to confirm your email address: <a href='{confirm_url}'>{confirm_url}</a></p>"
     send_email(email, "Confirm Your Email Address", html)
     return {"message": "A confirmation email has been sent."}, 200

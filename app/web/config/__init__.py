@@ -11,3 +11,4 @@ class Config:
     MAILGUN_API_KEY = os.environ['MAILGUN_API_KEY']
     MAILGUN_DOMAIN = os.environ['MAILGUN_DOMAIN']
     MAILGUN_DEFAULT_SENDER = os.environ['MAILGUN_DEFAULT_SENDER']
+    FRONTEND_URL = os.environ['FRONTEND_URL']
