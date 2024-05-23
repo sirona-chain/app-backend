@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: sirona-backend-deployment
+    labels:
+        app: sirona-backend-deployment
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: sirona-backend-deployment
+    template:
+        metadata:
+            labels:
+                app: sirona-backend-deployment
+        spec:
+            containers:
+                - name: sirona-backend-deployment
+                  image: registry.digitalocean.com/sirona/backend:backend
+                  ports:
+                      - containerPort: 8080
+                  env:
+                      - name: SECRET_KEY
+                        value: "123"
+                      - name: SQLALCHEMY_DATABASE_URI
+                        value: "sqlite:///sqlite.db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: pyservice
+spec:
+    selector:
+        app: sirona-backend-deployment
+    ports:
+        - port: 8000
+          targetPort: 8000
+    type: LoadBalancer
