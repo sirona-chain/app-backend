@@ -1,9 +1,11 @@
-from flask import Blueprint, g, request, session, jsonify, current_app, url_for
+from flask import Blueprint, g, request, session, jsonify, current_app, url_for, make_response
 from app.web.db.models import User
 from app.web.utils import generate_confirmation_token, send_email
+from flask_cors import CORS
 import jwt
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
+CORS(bp, supports_credentials=True)
 
 
 @bp.route("/user", methods=["GET"])
@@ -32,7 +34,11 @@ def confirm_email(token):
         email = payload['email']
         user = User.create_with_wallet(email=email)
         session["user_id"] = user.id
-        return {"message": "Email confirmed and user created.", "user": user.as_dict()}, 200
+
+        response = make_response({"message": "Email confirmed and user created.", "user": user.as_dict()}, 200)
+        response.set_cookie("auth_token", token, httponly=True, secure=True, samesite='Strict')
+
+        return response
     except jwt.ExpiredSignatureError:
         return {"message": "The confirmation link has expired."}, 400
     except jwt.InvalidTokenError:
@@ -42,4 +48,6 @@ def confirm_email(token):
 @bp.route("/signout", methods=["POST"])
 def signout():
     session.clear()
-    return {"message": "Successfully logged out."}
+    response = make_response({"message": "Successfully logged out."})
+    response.delete_cookie("auth_token")
+    return response
