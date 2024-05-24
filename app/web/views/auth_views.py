@@ -1,8 +1,11 @@
-from flask import Blueprint, g, request, session, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Blueprint, g, request, session, jsonify, current_app, url_for, make_response
 from app.web.db.models import User
+from app.web.utils import generate_confirmation_token, send_email
+from flask_cors import CORS
+import jwt
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
+CORS(bp, supports_credentials=True)
 
 
 @bp.route("/user", methods=["GET"])
@@ -16,31 +19,35 @@ def get_user():
 @bp.route("/signup", methods=["POST"])
 def signup():
     email = request.json.get("email")
-    password = request.json.get("password")
+    token = generate_confirmation_token(email)
+    frontend_url = current_app.config.get('FRONTEND_URL')
+    confirm_url = f"{frontend_url}/confirm/{token}"
+    html = f"<p>Please click the link to confirm your email address: <a href='{confirm_url}'>{confirm_url}</a></p>"
+    send_email(email, "Confirm Your Email Address", html)
+    return {"message": "A confirmation email has been sent."}, 200
 
-    user = User.create(email=email, password=generate_password_hash(password))
-    session["user_id"] = user.id
 
-    return user.as_dict()
+@bp.route("/confirm/<token>", methods=["GET"])
+def confirm_email(token):
+    try:
+        payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+        email = payload['email']
+        user = User.create_with_wallet(email=email)
+        session["user_id"] = user.id
 
+        response = make_response({"message": "Email confirmed and user created.", "user": user.as_dict()}, 200)
+        response.set_cookie("auth_token", token, httponly=True, secure=True, samesite='Strict')
 
-@bp.route("/signin", methods=["POST"])
-def signin():
-    email = request.json.get("email")
-    password = request.json.get("password")
-
-    user = User.find_by(email=email)
-
-    if not check_password_hash(user.password, password):
-        return {"message": "Incorrect password."}, 400
-
-    session.permanent = True
-    session["user_id"] = user.id
-
-    return user.as_dict()
+        return response
+    except jwt.ExpiredSignatureError:
+        return {"message": "The confirmation link has expired."}, 400
+    except jwt.InvalidTokenError:
+        return {"message": "Invalid token."}, 400
 
 
 @bp.route("/signout", methods=["POST"])
 def signout():
     session.clear()
-    return {"message": "Successfully logged out."}
+    response = make_response({"message": "Successfully logged out."})
+    response.delete_cookie("auth_token")
+    return response

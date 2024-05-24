@@ -8,6 +8,10 @@ from app.web.db import models
 from app.web.config import Config
 from app.web.hooks import load_logged_in_user, handle_error, add_headers
 from app.web.views import auth_views
+from flask_mail import Mail
+
+mail = Mail()
+
 
 def create_app():
     app = Flask(__name__)
@@ -22,12 +26,16 @@ def create_app():
 
     return app
 
+
 def register_extensions(app):
     db.init_app(app)
+    mail.init_app(app)
     app.cli.add_command(init_db_command)
+
 
 def register_blueprints(app):
     app.register_blueprint(auth_views.bp)
+
 
 def register_hooks(app):
     CORS(app)
