@@ -5,7 +5,7 @@ from app.chat import build_chat, ChatArgs
 from flask_cors import CORS
 
 bp = Blueprint("conversation", __name__, url_prefix="/api/conversations")
-CORS(bp, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+CORS(bp, supports_credentials=True)
 
 
 @bp.route("/", methods=["GET"])
