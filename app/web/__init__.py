@@ -7,7 +7,7 @@ from app.web.db import db, init_db_command
 from app.web.db import models
 from app.web.config import Config
 from app.web.hooks import load_logged_in_user, handle_error, add_headers
-from app.web.views import auth_views
+from app.web.views import (auth_views, conversation_views)
 from flask_mail import Mail
 
 mail = Mail()
@@ -35,6 +35,7 @@ def register_extensions(app):
 
 def register_blueprints(app):
     app.register_blueprint(auth_views.bp)
+    app.register_blueprint(conversation_views.bp)
 
 
 def register_hooks(app):
