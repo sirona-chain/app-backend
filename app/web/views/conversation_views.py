@@ -28,36 +28,33 @@ def create_conversation(user):
 def create_message(user, conversation_id):
     print("conversation_id", conversation_id)
     conversation = user.conversations[0]
-    input = request.json.get("input")
+    input_text = request.json.get("input")
     streaming = request.args.get("stream", False)
 
-    print("Received input:", input)
+    print("Received input:", input_text)
 
     chat_args = ChatArgs(
         conversation_id=conversation.id,
         streaming=streaming,
-        metadata={
-            "conversation_id": conversation.id,
-            "user_id": g.user.id,
-        },
+        metadata={"conversation_id": conversation.id, "user_id": g.user.id},
     )
+    print("before try")
 
-    chat = build_chat(chat_args)
-    print("Built chat:", chat)
+    try:
+        chat = build_chat(chat_args)
+        print("Built chat:", chat)
+        
+        if not chat:
+            return jsonify({"error": "Chat not yet implemented!"}), 501
+        
+        input_dict = {"input": input_text}
 
-    if not chat:
-        return "Chat not yet implemented!"
-
-    if streaming:
-        return Response(
-            stream_with_context(chat.stream(input)), mimetype="text/event-stream"
-        )
-    else:
-        try:
-            result = chat.run(input)
+        if streaming:
+            return Response(stream_with_context(chat.stream(input_dict)), mimetype="text/event-stream")
+        else:
+            result = chat.run(input_dict)
             print("Chat run result:", result)
-            return jsonify({"role": "assistant", "content": result})
-        except Exception as e:
-            print("Error running chat:", e)
-            return {"error": str(e)}, 500
-
+            return jsonify({"role": "assistant", "text": result})
+    except Exception as e:
+        print("Error running chat:", e)
+        return jsonify({"error": str(e)}), 500

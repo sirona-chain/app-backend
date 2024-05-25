@@ -18,7 +18,7 @@ class Message(BaseModel):
     conversation = db.relationship("Conversation", back_populates="messages")
 
     def as_dict(self):
-        return {"id": self.id, "role": self.role, "content": self.content}
+        return {"id": self.id, "role": self.role, "text": self.content}
 
     def as_lc_message(self) -> HumanMessage | AIMessage | SystemMessage:
         if self.role == "human":
