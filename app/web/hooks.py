@@ -20,7 +20,7 @@ def load_model(Model: Model, extract_id_lambda=None):
                 raise ValueError(f"{model_id_name} must be provided in the request.")
 
             instance = Model.find_by(id=model_id)
-
+            
             if instance.id != g.user.id:
                 raise Unauthorized("You are not authorized to view this.")
 

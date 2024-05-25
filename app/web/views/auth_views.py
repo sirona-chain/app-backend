@@ -1,7 +1,7 @@
 from flask import Blueprint, g, request, session, jsonify, current_app, url_for, make_response
+from flask_cors import CORS
 from app.web.db.models import User
 from app.web.utils import generate_confirmation_token, send_email
-from flask_cors import CORS
 import jwt
 
 bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -37,7 +37,7 @@ def confirm_email(token):
 
         response = make_response({"message": "Email confirmed and user created.", "user": user.as_dict()}, 200)
         response.set_cookie("auth_token", token, httponly=True, secure=True, samesite='Strict')
-
+        print("TOKEN !!!", token)
         return response
     except jwt.ExpiredSignatureError:
         return {"message": "The confirmation link has expired."}, 400

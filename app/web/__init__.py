@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
@@ -26,7 +25,6 @@ def create_app():
 
     return app
 
-
 def register_extensions(app):
     db.init_app(app)
     mail.init_app(app)
@@ -37,9 +35,7 @@ def register_blueprints(app):
     app.register_blueprint(auth_views.bp)
     app.register_blueprint(conversation_views.bp)
 
-
 def register_hooks(app):
-    CORS(app)
     app.before_request(load_logged_in_user)
     app.after_request(add_headers)
     app.register_error_handler(Exception, handle_error)

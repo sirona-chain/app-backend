@@ -5,7 +5,8 @@ from app.chat.llms import llm_map
 from app.chat.memories import memory_map
 from app.chat.llms.chatopenai import build_llm
 from app.chat.memories.sql_memory import build_memory
-from app.chat.chains.retrieval import StreamingConversationalRetrievalChain
+from app.chat.chains.retrieval import StreamingConversationalLLMChain
+from app.chat.prompt import ConcretePromptTemplate
 from langchain.chat_models import ChatOpenAI
 from app.web.api import (
     set_conversation_components,
@@ -46,11 +47,18 @@ def build_chat(chat_args: ChatArgs):
 
     condense_question_llm = ChatOpenAI(streaming=False)
 
-    return StreamingConversationalRetrievalChain.from_llm(
+    prompt_template = ConcretePromptTemplate(
+        condense_question_llm=condense_question_llm
+    )
+
+    # Initialize conversation with system message
+    initial_message = prompt_template.initialize_conversation()
+    condense_question_llm.invoke([initial_message])
+
+    return StreamingConversationalLLMChain(
         llm=llm,
         memory=memory,
-        retriever=None,
-        condense_question_llm=condense_question_llm,
+        prompt=prompt_template,
         metadata=chat_args.metadata
     )
 

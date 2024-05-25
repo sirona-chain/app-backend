@@ -50,7 +50,7 @@ def get_conversation_components(conversation_id: str) -> Dict[str, str]:
     conversation = Conversation.find_by(id=conversation_id)
     return {
         "llm": conversation.llm,
-        "retriever": conversation.retriever,
+        # "retriever": conversation.retriever,
         "memory": conversation.memory,
     }
 
