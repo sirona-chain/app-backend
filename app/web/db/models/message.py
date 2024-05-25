@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from app.web.db import db
 from langchain.schema.messages import AIMessage, HumanMessage, SystemMessage

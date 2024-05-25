@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict
 from langchain.schema.messages import AIMessage, HumanMessage, SystemMessage
 from app.web.db import db
