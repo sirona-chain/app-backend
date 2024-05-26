@@ -53,12 +53,20 @@ jobs:
               with:
                   kustomize-version: 4.4.1
 
-            - name: Render Kubernetes manifests
+            - name: Ensure kustomize base directory exists
               run: |
                   mkdir -p kustomize/overlays/prod
-                  cp -R k8s/base kustomize/overlays/prod
-                  kustomize edit set image registry.digitalocean.com/sirona/backend:backend
+                  mkdir -p k8s/base  # Ensure the base directory exists
 
+            - name: Copy base manifests to overlay
+              run: cp -R k8s/base/* kustomize/overlays/prod/
+
+            - name: Set image in kustomize
+              run: kustomize edit set image registry.digitalocean.com/sirona/backend:${{ secrets.BACKEND_IMAGE }}
+              working-directory: kustomize/overlays/prod
+
+            - name: Create secrets manifest
+              run: |
                   cat <<EOF > kustomize/overlays/prod/secrets.yaml
                   apiVersion: v1
                   kind: Secret
