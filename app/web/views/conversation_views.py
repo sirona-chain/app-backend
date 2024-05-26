@@ -8,13 +8,13 @@ bp = Blueprint("conversation", __name__, url_prefix="/api/conversations")
 CORS(bp, supports_credentials=True)
 
 @bp.route("/", methods=["GET"])
-@login_required
+# @login_required
 @load_model(User, lambda r: r.args.get("user_id"))
 def list_conversations(user):
     return [c.as_dict() for c in user.conversations]
 
 @bp.route("/", methods=["POST"])
-@login_required
+# @login_required
 @load_model(User, lambda r: r.args.get("user_id"))
 def create_conversation(user):
     conversation = Conversation.create(user_id=user.id)
@@ -23,7 +23,7 @@ def create_conversation(user):
 
 
 @bp.route("/<string:conversation_id>/messages", methods=["POST"])
-@login_required
+# @login_required
 @load_model(User, lambda r: r.args.get("user_id"))
 def create_message(user, conversation_id):
     print("conversation_id", conversation_id)

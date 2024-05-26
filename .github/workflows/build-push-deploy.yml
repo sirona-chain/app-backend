@@ -48,6 +48,33 @@ jobs:
                   tags: registry.digitalocean.com/${{ secrets.DOCR_REPOSITORY }}/backend:backend
                   labels: ${{ steps.meta.outputs.labels }}
 
+            - name: Set up Kustomize
+              uses: imranismail/setup-kustomize@v1
+              with:
+                  kustomize-version: 4.4.1
+
+            - name: Render Kubernetes manifests
+              run: |
+                  mkdir -p kustomize/overlays/prod
+                  cp -R k8s/base kustomize/overlays/prod
+                  kustomize edit set image registry.digitalocean.com/sirona/backend:backend
+
+                  cat <<EOF > kustomize/overlays/prod/secrets.yaml
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: sirona-backend-secrets
+                  type: Opaque
+                  data:
+                    OPENAI_API_KEY: $(echo -n '${{ secrets.OPENAI_API_KEY }}' | base64)
+                    SECRET_KEY: $(echo -n '${{ secrets.SECRET_KEY }}' | base64)
+                    SQLALCHEMY_DATABASE_URI: $(echo -n '${{ secrets.SQLALCHEMY_DATABASE_URI }}' | base64)
+                    MAILGUN_DOMAIN: $(echo -n '${{ secrets.MAILGUN_DOMAIN }}' | base64)
+                    MAILGUN_API_KEY: $(echo -n '${{ secrets.MAILGUN_API_KEY }}' | base64)
+                    MAILGUN_DEFAULT_SENDER: $(echo -n '${{ secrets.MAILGUN_DEFAULT_SENDER }}' | base64)
+                    FRONTEND_URL: $(echo -n '${{ secrets.FRONTEND_URL }}' | base64)
+                  EOF
+
             - name: Update deployment file
               run: TAG=backend && sed -i 's|<IMAGE>|${{ secrets.DOCR_REPOSITORY }}/backend:backend|' $GITHUB_WORKSPACE/config/deployment.yml
 
