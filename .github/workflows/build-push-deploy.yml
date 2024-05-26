@@ -56,13 +56,13 @@ jobs:
             - name: Ensure kustomize base directory exists
               run: |
                   mkdir -p kustomize/overlays/prod
-                  mkdir -p k8s/base  # Ensure the base directory exists
+                  mkdir -p config  # Ensure the base directory exists
 
             - name: Copy base manifests to overlay
-              run: cp -R k8s/base/* kustomize/overlays/prod/
+              run: cp -R config/* kustomize/overlays/prod/
 
             - name: Set image in kustomize
-              run: kustomize edit set image registry.digitalocean.com/sirona/backend:${{ secrets.BACKEND_IMAGE }}
+              run: kustomize edit set image registry.digitalocean.com/sirona/backend:backend
               working-directory: kustomize/overlays/prod
 
             - name: Create secrets manifest
