@@ -20,10 +20,41 @@ spec:
                   ports:
                       - containerPort: 8080
                   env:
+                      - name: OPENAI_API_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: OPENAI_API_KEY
                       - name: SECRET_KEY
-                        value: "123"
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: SECRET_KEY
                       - name: SQLALCHEMY_DATABASE_URI
-                        value: "sqlite:///sqlite.db"
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: SQLALCHEMY_DATABASE_URI
+                      - name: MAILGUN_DOMAIN
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: MAILGUN_DOMAIN
+                      - name: MAILGUN_API_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: MAILGUN_API_KEY
+                      - name: MAILGUN_DEFAULT_SENDER
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: MAILGUN_DEFAULT_SENDER
+                      - name: FRONTEND_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: sirona-backend-secrets
+                                key: FRONTEND_URL
 ---
 apiVersion: v1
 kind: Service

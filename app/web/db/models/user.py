@@ -11,6 +11,7 @@ class User(BaseModel):
     email: str = db.Column(db.String(80), unique=True, nullable=False)
     polkadot_address: str = db.Column(db.String(80), unique=True, nullable=True)
     polkadot_private_key: str = db.Column(db.String(255), nullable=True)
+    conversations = db.relationship("Conversation", back_populates="user")
 
     def as_dict(self):
         return {"id": self.id, "email": self.email, "polkadot_address": self.polkadot_address}
