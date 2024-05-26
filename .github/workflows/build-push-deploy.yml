@@ -58,11 +58,18 @@ jobs:
                   mkdir -p kustomize/overlays/prod
                   mkdir -p config  # Ensure the base directory exists
 
+            - name: Create kustomization.yaml if it doesn't exist
+              run: |
+                  if [ ! -f kustomize/overlays/prod/kustomization.yaml ]; then
+                      echo "resources:" > kustomize/overlays/prod/kustomization.yaml
+                      echo "- ../../base" >> kustomize/overlays/prod/kustomization.yaml
+                  fi
+
             - name: Copy base manifests to overlay
               run: cp -R config/* kustomize/overlays/prod/
 
             - name: Set image in kustomize
-              run: kustomize edit set image registry.digitalocean.com/sirona/backend:backend
+              run: kustomize edit set image registry.digitalocean.com/${{ secrets.DOCR_REPOSITORY }}/kustomize:latest
               working-directory: kustomize/overlays/prod
 
             - name: Create secrets manifest
@@ -84,7 +91,7 @@ jobs:
                   EOF
 
             - name: Update deployment file
-              run: TAG=backend && sed -i 's|<IMAGE>|${{ secrets.DOCR_REPOSITORY }}/backend:backend|' $GITHUB_WORKSPACE/config/deployment.yml
+              run: sed -i 's|<IMAGE>|registry.digitalocean.com/${{ secrets.DOCR_REPOSITORY }}/backend:backend|' $GITHUB_WORKSPACE/config/deployment.yml
 
             - name: Save DigitalOcean kubeconfig with short-lived credentials
               run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 sirona-app
